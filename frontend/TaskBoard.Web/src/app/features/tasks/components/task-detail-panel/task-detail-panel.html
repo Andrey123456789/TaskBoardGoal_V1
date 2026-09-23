@@ -1,0 +1,191 @@
+<section class="panel" aria-label="Task details">
+  <header class="panel-header">
+    <h2>Task details</h2>
+    <button mat-button type="button" class="hide-details" (click)="closed.emit()">
+      Hide details
+    </button>
+  </header>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (details(); as task) {
+    <div class="overview">
+      <span [class]="'status-badge status-' + task.status">{{ statusLabels[task.status] }}</span>
+      <dl>
+        <dt>Project</dt>
+        <dd>{{ task.project.name }}</dd>
+        <dt>Created</dt>
+        <dd>{{ task.createdAt | date: 'medium' }}</dd>
+        <dt>Updated</dt>
+        <dd>{{ task.updatedAt | date: 'medium' }}</dd>
+      </dl>
+    </div>
+
+    <div class="actions">
+      @if (actionLabel(); as label) {
+        <button
+          mat-flat-button
+          type="button"
+          class="status-action"
+          [disabled]="!canAdvance() || busy()"
+          (click)="advance()"
+        >
+          {{ label }}
+        </button>
+      }
+      @if (!locked()) {
+        <button
+          mat-stroked-button
+          type="button"
+          class="delete"
+          [disabled]="busy()"
+          (click)="delete()"
+        >
+          Delete
+        </button>
+      } @else {
+        <button
+          mat-stroked-button
+          type="button"
+          class="follow-up"
+          (click)="followUpRequested.emit(task)"
+        >
+          Create related task
+        </button>
+      }
+    </div>
+
+    @if (task.status === 'Created' && !canAdvance()) {
+      <p class="hint">Assign an active user to start this task.</p>
+    }
+
+    @if (locked()) {
+      <section class="read-only" aria-label="Task information">
+        <h3 class="task-title">{{ task.title }}</h3>
+        <p class="description">{{ task.description || 'No description.' }}</p>
+        <p class="assignee">
+          Assignee:
+          @if (task.assignee; as assignee) {
+            <span [class.deleted-user]="assignee.isDeletedUser">{{ assignee.name }}</span>
+          } @else {
+            <span class="unassigned">Unassigned</span>
+          }
+        </p>
+        <p class="hint">
+          {{ statusLabels[task.status] }} tasks are read-only. Related tasks can still be changed.
+        </p>
+      </section>
+    } @else {
+      <form class="edit-form" [formGroup]="form" (ngSubmit)="save()">
+        <mat-form-field appearance="outline">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" [maxlength]="titleMaxLength" required />
+          @if (form.controls.title.hasError('required')) {
+            <mat-error>Title is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="4"></textarea>
+        </mat-form-field>
+
+        @if (deletedAssignee()) {
+          <p class="warning">
+            The assigned user was deleted. Choose an active user{{
+              allowUnassigned() ? ' or Unassigned' : ''
+            }}
+            before saving.
+          </p>
+        }
+
+        <mat-form-field appearance="outline">
+          <mat-label>Assignee</mat-label>
+          <mat-select formControlName="assigneeId">
+            @if (allowUnassigned()) {
+              <mat-option [value]="null">Unassigned</mat-option>
+            }
+            @if (deletedAssignee(); as deletedUser) {
+              <mat-option [value]="deletedUser.id" disabled>{{ deletedUser.name }}</mat-option>
+            }
+            @for (user of users(); track user.id) {
+              <mat-option [value]="user.id">{{ user.name }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.assigneeId.hasError('required')) {
+            <mat-error>A task in progress must have an assignee.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button
+            mat-flat-button
+            type="submit"
+            class="save"
+            [disabled]="form.invalid || form.pristine || busy()"
+          >
+            Save changes
+          </button>
+        </div>
+      </form>
+    }
+
+    <section class="related" aria-label="Related tasks">
+      <h3>Related tasks</h3>
+      <ul class="related-list">
+        @for (related of task.relatedTasks; track related.id) {
+          <li class="related-item">
+            <button type="button" class="link" (click)="relatedTaskOpened.emit(related.id)">
+              {{ related.title }}
+            </button>
+            <span class="related-meta"
+              >{{ related.project.name }} · {{ statusLabels[related.status] }}</span
+            >
+            <button
+              mat-button
+              type="button"
+              class="remove-related"
+              [disabled]="busy()"
+              [attr.aria-label]="'Remove relation to ' + related.title"
+              (click)="removeRelated(related.id)"
+            >
+              Remove
+            </button>
+          </li>
+        } @empty {
+          <li class="hint">No related tasks.</li>
+        }
+      </ul>
+
+      <div class="add-related">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Add related task</mat-label>
+          <mat-select
+            class="related-select"
+            [value]="selectedRelatedTaskId()"
+            (valueChange)="selectedRelatedTaskId.set($event)"
+          >
+            @for (candidate of relatedCandidates(); track candidate.id) {
+              <mat-option [value]="candidate.id">
+                {{ candidate.title }} ({{ candidate.project.name }})
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button
+          mat-stroked-button
+          type="button"
+          class="add-related-button"
+          [disabled]="!selectedRelatedTaskId() || busy()"
+          (click)="addRelated()"
+        >
+          Add
+        </button>
+      </div>
+    </section>
+  } @else if (!loading()) {
+    <p class="hint">This task could not be loaded.</p>
+  }
+</section>

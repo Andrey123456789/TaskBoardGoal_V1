@@ -1,0 +1,32 @@
+<article class="task-card" [class.selected]="selected()" (click)="opened.emit(task().id)">
+  <button type="button" class="title" (click)="$event.stopPropagation(); opened.emit(task().id)">
+    {{ task().title }}
+  </button>
+
+  <div class="meta">
+    <span class="project" title="Project">{{ task().project.name }}</span>
+    @if (task().assignee; as assignee) {
+      <span class="assignee" [class.deleted-user]="assignee.isDeletedUser" title="Assignee">
+        {{ assignee.name }}
+      </span>
+    } @else {
+      <span class="assignee unassigned" title="Assignee">Unassigned</span>
+    }
+  </div>
+
+  <div class="footer">
+    <span [class]="'status-badge status-' + task().status">{{ statusLabel() }}</span>
+    @if (actionLabel(); as label) {
+      <button
+        mat-stroked-button
+        type="button"
+        class="advance"
+        [disabled]="!canAdvance()"
+        [attr.title]="canAdvance() ? null : 'Assign an active user to start this task'"
+        (click)="advance($event)"
+      >
+        {{ label }}
+      </button>
+    }
+  </div>
+</article>

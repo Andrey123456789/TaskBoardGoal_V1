@@ -1,0 +1,105 @@
+<mat-toolbar class="toolbar">
+  <span class="brand">TaskBoard</span>
+  <span class="spacer"></span>
+  <button mat-button type="button" class="manage-projects" (click)="openProjects()">
+    Projects
+  </button>
+  <button mat-button type="button" class="manage-users" (click)="openUsers()">Users</button>
+</mat-toolbar>
+
+<mat-drawer-container class="container" autosize>
+  <mat-drawer
+    class="details-drawer"
+    mode="side"
+    position="end"
+    [opened]="store.selectedTaskId() !== null"
+  >
+    @if (store.selectedTaskId(); as taskId) {
+      <app-task-detail-panel
+        [taskId]="taskId"
+        [version]="store.detailsVersion()"
+        [users]="store.users()"
+        (closed)="store.clearSelection()"
+        (changed)="store.reloadTasks()"
+        (deleted)="onTaskDeleted()"
+        (relatedTaskOpened)="store.select($event)"
+        (followUpRequested)="openNewTask($event)"
+      />
+    }
+  </mat-drawer>
+
+  <mat-drawer-content class="main">
+    <section class="filters" aria-label="Board filters">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter">
+        <mat-label>Project</mat-label>
+        <mat-select
+          class="project-filter"
+          [value]="store.projectFilter()"
+          (valueChange)="store.setProjectFilter($event)"
+        >
+          <mat-option [value]="null">All projects</mat-option>
+          @for (project of store.projects(); track project.id) {
+            <mat-option [value]="project.id">{{ project.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter">
+        <mat-label>Assignee</mat-label>
+        <mat-select
+          class="assignee-filter"
+          [value]="store.assigneeFilter()"
+          (valueChange)="store.setAssigneeFilter($event)"
+        >
+          <mat-option [value]="null">All users</mat-option>
+          @for (user of store.users(); track user.id) {
+            <mat-option [value]="user.id">{{ user.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-slide-toggle
+        class="show-closed"
+        [checked]="store.showClosed()"
+        (change)="store.setShowClosed($event.checked)"
+      >
+        Show closed tasks
+      </mat-slide-toggle>
+
+      <span class="spacer"></span>
+
+      <button mat-flat-button type="button" class="new-task" (click)="openNewTask()">
+        New Task
+      </button>
+    </section>
+
+    <div class="progress">
+      @if (store.loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+    </div>
+
+    <section class="board" aria-label="Task board">
+      @for (column of store.columns(); track column.status) {
+        <div class="column" [attr.data-status]="column.status">
+          <h2 class="column-title">
+            {{ column.label }}
+            <span class="count">{{ column.tasks.length }}</span>
+          </h2>
+          <div class="column-body">
+            @for (task of column.tasks; track task.id) {
+              <app-task-card
+                [task]="task"
+                [selected]="task.id === store.selectedTaskId()"
+                (opened)="store.select($event)"
+                (advanced)="store.advance($event)"
+              />
+            } @empty {
+              <p class="empty">No tasks</p>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  </mat-drawer-content>
+</mat-drawer-container>

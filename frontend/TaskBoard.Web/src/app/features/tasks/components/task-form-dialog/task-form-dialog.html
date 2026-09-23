@@ -1,0 +1,82 @@
+<h2 mat-dialog-title>{{ isFollowUp ? 'Create related task' : 'New task' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="content">
+    @if (isFollowUp) {
+      <p class="hint">
+        The new task starts as Created and is related to
+        @for (source of sourceTasks(); track source.id) {
+          <strong>{{ source.title }}</strong>
+        } @empty {
+          the selected task
+        }
+        . The original task is not changed.
+      </p>
+    }
+
+    @if (projects.length === 0) {
+      <p class="error">Create a project first (Projects in the toolbar).</p>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Title</mat-label>
+      <input
+        matInput
+        formControlName="title"
+        [maxlength]="titleMaxLength"
+        required
+        cdkFocusInitial
+      />
+      @if (form.controls.title.hasError('required')) {
+        <mat-error>Title is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Project</mat-label>
+      <mat-select formControlName="projectId" required>
+        @for (project of projects; track project.id) {
+          <mat-option [value]="project.id">{{ project.name }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.projectId.hasError('required')) {
+        <mat-error>Project is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Assignee</mat-label>
+      <mat-select formControlName="assigneeId">
+        <mat-option [value]="null">Unassigned</mat-option>
+        @for (user of users; track user.id) {
+          <mat-option [value]="user.id">{{ user.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Related tasks</mat-label>
+      <mat-select formControlName="relatedTaskIds" multiple>
+        @for (task of allTasks(); track task.id) {
+          <mat-option [value]="task.id">{{ task.title }} ({{ task.project.name }})</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (errorMessage(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancel</button>
+    <button mat-flat-button type="submit" [disabled]="saving() || projects.length === 0">
+      Create task
+    </button>
+  </mat-dialog-actions>
+</form>

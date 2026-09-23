@@ -1,0 +1,71 @@
+.task-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container-lowest);
+  border: 1px solid var(--mat-sys-outline-variant);
+  cursor: pointer;
+  transition:
+    box-shadow 120ms ease,
+    border-color 120ms ease;
+
+  &:hover {
+    box-shadow: var(--mat-sys-level1);
+  }
+
+  &.selected {
+    border-color: var(--mat-sys-primary);
+    box-shadow: 0 0 0 1px var(--mat-sys-primary);
+  }
+}
+
+.title {
+  all: unset;
+  font: var(--mat-sys-title-small);
+  color: var(--mat-sys-on-surface);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.project::before {
+  content: '▣ ';
+}
+
+.assignee::before {
+  content: '● ';
+}
+
+.unassigned,
+.deleted-user {
+  font-style: italic;
+}
+
+.deleted-user {
+  color: var(--mat-sys-error);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.advance {
+  --mat-button-outlined-container-height: 30px;
+}

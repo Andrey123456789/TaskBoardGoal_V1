@@ -1,0 +1,81 @@
+// Shared layout for the user and project management dialogs.
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: min(560px, 85vw);
+}
+
+.editor h3 {
+  margin: 0 0 8px;
+  font: var(--mat-sys-title-small);
+}
+
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.error {
+  margin: 0;
+  color: var(--mat-sys-error);
+}
+
+.items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  &.editing {
+    background: var(--mat-sys-secondary-container);
+  }
+}
+
+.item-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item-name {
+  font: var(--mat-sys-body-large);
+}
+
+.item-detail {
+  overflow: hidden;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.danger {
+  color: var(--mat-sys-error);
+}
+
+.empty {
+  padding: 12px 0;
+  color: var(--mat-sys-on-surface-variant);
+}

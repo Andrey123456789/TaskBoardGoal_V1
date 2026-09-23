@@ -1,0 +1,16 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  min-width: min(480px, 80vw);
+  padding-top: 8px;
+}
+
+.hint {
+  margin: 0 0 16px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.error {
+  margin: 0 0 12px;
+  color: var(--mat-sys-error);
+}
